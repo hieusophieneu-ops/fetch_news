@@ -47,7 +47,7 @@ def get_news():
                     "previous": get_text(event, "previous")
                 })
 
-        return jsonify(result)
+        return jsonify(result.length == 0 ? res : result)
 
     except Exception as e:
         return jsonify({"error": str(e)})
