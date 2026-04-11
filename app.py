@@ -36,10 +36,10 @@ def get_news():
         result = []
 
         for event in root.findall("event"):
-            currency = get_text(event, "currency")
+            currency = get_text(event, "country")
             impact   = get_text(event, "impact")
 
-            if currency == "USD" and impact == "High":
+            if currency == "USD":
                 result.append({
                     "title": get_text(event, "title"),
                     "time": get_text(event, "time"),
