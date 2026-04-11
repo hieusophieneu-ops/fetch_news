@@ -36,18 +36,19 @@ def get_news():
         result = []
 
         for event in root.findall("event"):
-            currency = get_text(event, "country")
+            country = get_text(event, "country")
             impact   = get_text(event, "impact")
 
-            if currency == "USD":
+            if country == "USD" and impact =="High":
                 result.append({
                     "title": get_text(event, "title"),
                     "time": get_text(event, "time"),
                     "forecast": get_text(event, "forecast"),
-                    "previous": get_text(event, "previous")
+                    "previous": get_text(event, "previous"),
+                    "date": get_text(event, "date")
                 })
 
-        return jsonify(res if len(result) == 0 else result)
+        return jsonify(result)
 
     except Exception as e:
         return jsonify({"error": str(e)})
