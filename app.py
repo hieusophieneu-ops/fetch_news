@@ -12,6 +12,8 @@ def get_text(parent, tag):
 @app.route("/news")
 def get_news():
     try:
+        print("CALL API START")
+        
         url = "https://nfs.faireconomy.media/ff_calendar_thisweek.xml"
         
         res = requests.get(url, headers={
