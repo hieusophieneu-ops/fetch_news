@@ -4,31 +4,45 @@ import xml.etree.ElementTree as ET
 
 app = Flask(__name__)
 
+def get_text(parent, tag):
+    el = parent.find(tag)
+    return el.text if el is not None else ""
+
 @app.route("/news")
 def get_news():
-    url = "https://nfs.faireconomy.media/ff_calendar_thisweek.xml"
-    
-    res = requests.get(url, headers={
-        "User-Agent": "Mozilla/5.0"
-    })
+    try:
+        url = "https://nfs.faireconomy.media/ff_calendar_thisweek.xml"
+        
+        res = requests.get(url, headers={
+            "User-Agent": "Mozilla/5.0"
+        }, timeout=10)
 
-    root = ET.fromstring(res.content)
+        print("STATUS:", res.status_code)
+        print("DATA:", res.text[:200])
 
-    result = []
+        if res.status_code != 200:
+            return jsonify({"error": "Request failed", "status": res.status_code})
 
-    for event in root.findall("event"):
-        currency = event.find("currency").text
-        impact   = event.find("impact").text
+        try:
+            root = ET.fromstring(res.content)
+        except:
+            return jsonify({"error": "Invalid XML", "raw": res.text[:200]})
 
-        if currency == "USD" and impact == "High":
-            result.append({
-                "title": event.find("title").text,
-                "time": event.find("time").text,
-                "forecast": event.find("forecast").text,
-                "previous": event.find("previous").text
-            })
+        result = []
 
-    return jsonify(result)
+        for event in root.findall("event"):
+            currency = get_text(event, "currency")
+            impact   = get_text(event, "impact")
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+            if currency == "USD" and impact == "High":
+                result.append({
+                    "title": get_text(event, "title"),
+                    "time": get_text(event, "time"),
+                    "forecast": get_text(event, "forecast"),
+                    "previous": get_text(event, "previous")
+                })
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
