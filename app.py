@@ -15,7 +15,9 @@ def get_news():
         url = "https://nfs.faireconomy.media/ff_calendar_thisweek.xml"
         
         res = requests.get(url, headers={
-            "User-Agent": "Mozilla/5.0"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Accept": "application/xml",
+            "Connection": "keep-alive"
         }, timeout=10)
 
         print("STATUS:", res.status_code)
