@@ -2,12 +2,21 @@ from flask import Flask, jsonify
 import requests
 import xml.etree.ElementTree as ET
 import os
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
 def get_text(parent, tag):
     el = parent.find(tag)
     return el.text if el is not None else ""
+
+def convert_gmt0_to_gmt7(time_str):
+    # ví dụ: "2:00pm"
+    dt = datetime.strptime(time_str, "%I:%M%p")
+    
+    dt = dt + timedelta(hours=7)
+    
+    return dt.strftime("%H:%M")
 
 @app.route("/news")
 def get_news():
@@ -42,7 +51,7 @@ def get_news():
             if country == "USD" and impact =="High":
                 result.append({
                     "title": get_text(event, "title"),
-                    "time": get_text(event, "time"),
+                    "time": convert_gmt0_to_gmt7(get_text(event, "time")),
                     "forecast": get_text(event, "forecast"),
                     "previous": get_text(event, "previous"),
                     "date": get_text(event, "date")
