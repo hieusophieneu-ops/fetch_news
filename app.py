@@ -6,6 +6,10 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
+def format_date_dmy(date_str):
+    dt = datetime.strptime(date_str, "%m-%d-%Y")  # input m-d-y
+    return dt.strftime("%d-%m-%Y")               # output d-m-y
+
 def get_text(parent, tag):
     el = parent.find(tag)
     return el.text if el is not None else ""
@@ -56,7 +60,7 @@ def get_news():
                     "previous": get_text(event, "previous")
                 })
 
-        msg = f"📊 USD HIGH NEWS ({input_date})\n\n"
+        msg = f"📊 USD HIGH NEWS ({format_date_dmy(input_date)})\n\n"
 
         if not result:
             msg += "No news."
