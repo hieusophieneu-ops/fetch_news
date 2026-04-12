@@ -76,8 +76,6 @@ def get_news():
                     msg += f"Previous: {item['previous']}\n"
 
                 msg += "--------------\n"
-                
-            msg += "\nTham khảo tại: https://www.forexfactory.com/calendar"
 
         return msg 
 
