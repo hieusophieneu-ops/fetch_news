@@ -21,7 +21,9 @@ def convert_gmt0_to_gmt7(time_str):
 @app.route("/news")
 def get_news():
     try:
-        print("CALL API START")
+        input_date = request.args.get("date")
+        if not input_date:
+            input_date = datetime.now().strftime("%m-%d-%Y")
         
         url = "https://nfs.faireconomy.media/ff_calendar_thisweek.xml"
         
@@ -30,9 +32,6 @@ def get_news():
             "Accept": "application/xml",
             "Connection": "keep-alive"
         }, timeout=10)
-
-        print("STATUS:", res.status_code)
-        print("DATA:", res.text[:200])
 
         if res.status_code != 200:
             return jsonify({"error": "Request failed", "status": res.status_code})
@@ -47,17 +46,34 @@ def get_news():
         for event in root.findall("event"):
             country = get_text(event, "country")
             impact   = get_text(event, "impact")
+            date    = get_text(event, "date")
 
-            if country == "USD" and impact =="High":
+            if country == "USD" and impact =="High" and date == input_date:
                 result.append({
                     "title": get_text(event, "title"),
                     "time": convert_gmt0_to_gmt7(get_text(event, "time")),
                     "forecast": get_text(event, "forecast"),
-                    "previous": get_text(event, "previous"),
-                    "date": get_text(event, "date")
+                    "previous": get_text(event, "previous")
                 })
 
-        return jsonify(result)
+        msg = f"📊 USD HIGH NEWS ({input_date})\n\n"
+
+        if not result:
+            msg += "No news."
+        else:
+            for item in result:
+                msg += f"🕒 {item['time']}\n"
+                msg += f"{item['title']}\n"
+
+                if item["forecast"]:
+                    msg += f"Forecast: {item['forecast']}\n"
+
+                if item["previous"]:
+                    msg += f"Previous: {item['previous']}\n"
+
+                msg += "------------------\n"
+
+        return msg 
 
     except Exception as e:
         return jsonify({"error": str(e)})
