@@ -60,7 +60,7 @@ def get_news():
                     "previous": get_text(event, "previous")
                 })
 
-        msg = f"📊 USD HIGH NEWS ({format_date_dmy(input_date)})\n\n"
+        msg = f"📅 USD HIGH NEWS ({format_date_dmy(input_date)})\n\n"
 
         if not result:
             msg += "No news."
@@ -75,7 +75,9 @@ def get_news():
                 if item["previous"]:
                     msg += f"Previous: {item['previous']}\n"
 
-                msg += "------------------\n"
+                msg += "--------------\n"
+                
+            msg += "\nTham khảo tại: https://www.forexfactory.com/calendar"
 
         return msg 
 
