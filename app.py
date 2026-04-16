@@ -3,6 +3,9 @@ import requests
 import xml.etree.ElementTree as ET
 import os
 from datetime import datetime, timedelta
+import time
+import hmac
+import hashlib
 
 app = Flask(__name__)
 
@@ -21,6 +24,61 @@ def convert_gmt0_to_gmt7(time_str):
     dt = dt + timedelta(hours=7)
     
     return dt.strftime("%H:%M")
+
+# ===== LICENSE CONFIG =====
+SECRET = "KyCac_ThachLam_ThachHa_HaTinh_HieuDD"
+
+VALID_ACCOUNTS = [
+    "257255068",
+    "183819475",
+    "159889038",
+    "257350472"
+]
+
+TIME_WINDOW = 30  # seconds
+
+
+def verify_signature(account, timestamp, signature):
+    msg = f"{account}{timestamp}"
+    
+    expected = hmac.new(
+        SECRET.encode(),
+        msg.encode(),
+        hashlib.sha256
+    ).hexdigest()
+
+    return expected == signature
+
+@app.route("/check-license", methods=["POST"])
+def check_license():
+    try:
+        data = request.get_json()
+
+        account = data.get("account")
+        timestamp = data.get("timestamp")
+        signature = data.get("signature")
+
+        # 1. Check thiếu dữ liệu
+        if not account or not timestamp or not signature:
+            return jsonify({"status": "INVALID_REQUEST"})
+
+        # 2. Check timestamp (chống replay)
+        now = int(time.time())
+        if abs(now - int(timestamp)) > TIME_WINDOW:
+            return jsonify({"status": "EXPIRED"})
+
+        # 3. Verify signature
+        if not verify_signature(account, timestamp, signature):
+            return jsonify({"status": "INVALID_SIGNATURE"})
+
+        # 4. Check account hợp lệ
+        if account not in VALID_ACCOUNTS:
+            return jsonify({"status": "INVALID_ACCOUNT"})
+
+        return jsonify({"status": "VALID"})
+
+    except Exception as e:
+        return jsonify({"status": "ERROR", "msg": str(e)})
 
 @app.route("/news")
 def get_news():
