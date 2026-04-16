@@ -63,7 +63,7 @@ def get_news():
         msg = f"📅 USD HIGH NEWS ({format_date_dmy(input_date)})\n\n"
 
         if not result:
-            msg += "No news."
+            msg += "No news.\n--------------"
         else:
             for item in result:
                 msg += f"🕒 {item['time']}\n"
