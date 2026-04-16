@@ -62,18 +62,18 @@ def check_license():
         if not account or not timestamp or not signature:
             return jsonify({"status": "INVALID_REQUEST"})
 
-        # 2. Check timestamp (chống replay)
+        # 2. Check account hợp lệ
+        if account not in VALID_ACCOUNTS:
+            return jsonify({"status": "INVALID_ACCOUNT"})
+
+        # 3. Check timestamp (chống replay)
         now = int(time.time())
         if abs(now - int(timestamp)) > TIME_WINDOW:
             return jsonify({"status": "EXPIRED"})
 
-        # 3. Verify signature
+        # 4. Verify signature
         if not verify_signature(account, timestamp, signature):
             return jsonify({"status": "INVALID_SIGNATURE"})
-
-        # 4. Check account hợp lệ
-        if account not in VALID_ACCOUNTS:
-            return jsonify({"status": "INVALID_ACCOUNT"})
 
         return jsonify({"status": "VALID"})
 
